@@ -1,9 +1,9 @@
-"""Training script for ML sentiment model"""
+
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 import pickle
 import logging
 import os
@@ -68,7 +68,7 @@ def prepare_data(df):
 
 
 def vectorize_text(X_train,X_test):
-    vectorizer = TfidfVectorizer(max_features=10000,stop_words="english",ngram_range=(1,2))
+    vectorizer = TfidfVectorizer(max_features=10000,min_df=2,max_df=0.8,ngram_range=(1,2))
 
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec = vectorizer.transform(X_test)
@@ -91,7 +91,7 @@ def split_data(X,y):
 
 
 def train_model(X_train , y_train):
-    model = LogisticRegression(max_iter=1000)
+    model = RandomForestClassifier()
     model.fit(X_train , y_train)
     logger.info("Model trained")
     return model
