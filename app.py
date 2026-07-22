@@ -9,15 +9,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ============================================================================
-# INITIALIZE FLASK APP
-# ============================================================================
 
-app = Flask(__name__)  # ✓ Flask(__name__)
+
+
+app = Flask(__name__)  
 
 try:
-    with open('models/model.pkl', 'rb') as f:  # ✓ 'rb' = read binary
-        model = pickle.load(f)  # ✓ pickle.load()
+    with open('models/model.pkl', 'rb') as f:  
+        model = pickle.load(f)  
     
     with open('models/vectorizer.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
@@ -28,49 +27,45 @@ except FileNotFoundError:
     exit()
 
 
-# ============================================================================
-# ROUTE 1: HEALTH CHECK
-# ============================================================================
 
-@app.route('/', methods=['GET'])  # ✓ 'GET' method
+
+@app.route('/', methods=['GET'])  
 def health_check():
     """Health check endpoint"""
     
     logger.info("Health check requested")
-    return jsonify({"message": "API is running"})  # ✓ jsonify()
+    return jsonify({"message": "API is running"})  
 
 
-# ============================================================================
-# ROUTE 2: MAKE PREDICTION
-# ============================================================================
 
-@app.route('/predict', methods=['POST'])  # ✓ 'POST' sends data
+
+@app.route('/predict', methods=['POST'])  
 def predict():
     """Make sentiment prediction"""
     
     try:
-        data = request.json  # ✓ request.json
+        data = request.json  
         logger.info("Prediction request received")
         
-        # VALIDATION
-        if 'text' not in data:  # ✓ Check if 'text' in data
+        
+        if 'text' not in data:  
             error_msg = "Missing 'text' field"
             logger.warning(error_msg)
-            return jsonify({"error": error_msg}), 400  # ✓ 400 status
+            return jsonify({"error": error_msg}), 400  
         
         text = data.get('text', '')
         
         if not text or len(text.strip()) == 0:
             error_msg = "Text cannot be empty"
             logger.warning(error_msg)
-            return jsonify({"error": error_msg}), 400  # ✓ 400 status
+            return jsonify({"error": error_msg}), 400  
         
-        # PROCESS
-        text_vectorized = vectorizer.transform([text])  # ✓ transform()
-        prediction = model.predict(text_vectorized)[0]  # ✓ predict()
-        confidence = model.predict_proba(text_vectorized).max()  # ✓ confidence
         
-        # RESPONSE
+        text_vectorized = vectorizer.transform([text])  
+        prediction = model.predict(text_vectorized)[0]  
+        confidence = model.predict_proba(text_vectorized).max()  
+        
+        
         response = {
             "text": text[:100],
             "sentiment": prediction,
@@ -78,17 +73,15 @@ def predict():
         }
         
         logger.info(f"Prediction: {prediction} (confidence: {confidence:.2f})")
-        return jsonify(response), 200  # ✓ 200 status
+        return jsonify(response), 200  
     
     except Exception as e:
         error_msg = f"Error: {str(e)}"
         logger.error(error_msg)
-        return jsonify({"error": error_msg}), 500  # ✓ 500 status
+        return jsonify({"error": error_msg}), 500  
 
 
-# ============================================================================
-# START SERVER
-# ============================================================================
+
 
 if __name__ == '__main__':
     print("\n" + "=" * 50)
@@ -96,7 +89,7 @@ if __name__ == '__main__':
     print("=" * 50)
     
     app.run(
-        host='0.0.0.0',  # ✓ Listen on all interfaces
-        port=8000,  # ✓ Port 5000
-        debug=True  # ✓ Debug mode
+        host='0.0.0.0',  
+        port=8000,  
+        debug=True  
     )
